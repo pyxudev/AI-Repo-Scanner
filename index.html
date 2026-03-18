@@ -190,6 +190,12 @@
 
     @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
     .card-enter{animation:fadeUp .4s ease-out both}
+
+    /* ── 言語切り替えボタン ── */
+    .lang-switcher{display:flex;align-items:center;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:3px;flex-shrink:0}
+    .lang-btn{padding:4px 9px;border-radius:5px;border:none;background:transparent;color:var(--muted);font-size:11px;font-family:var(--font-mono);font-weight:600;cursor:pointer;transition:all .15s;letter-spacing:.03em}
+    .lang-btn:hover{color:var(--muted2)}
+    .lang-btn.active{background:var(--surface3);color:var(--text)}
   </style>
 </head>
 <body>
@@ -209,13 +215,13 @@
       </div>
       <div class="logo">
         <h1>AI Repo Scanner</h1>
-        <p class="mono">AIで生成したリポジトリを検出</p>
+        <p class="mono" data-i18n="subtitle">AIで生成したリポジトリを検出</p>
       </div>
     </div>
     <div class="header-controls">
       <div class="llm-badge unknown" id="llm-badge">
         <div class="badge-dot"></div>
-        <span id="llm-badge-text">LLM 未設定</span>
+        <span id="llm-badge-text" data-i18n="llmUnset">LLM 未設定</span>
       </div>
       <div class="model-badge" id="model-badge" style="display:none">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -223,11 +229,16 @@
       </div>
       <div class="status-badge">
         <div class="pulse" id="pulse-dot"></div>
-        <span id="status-text" class="mono">待機中</span>
+        <span id="status-text" class="mono" data-i18n="standby">待機中</span>
+      </div>
+      <div class="lang-switcher">
+        <button class="lang-btn active" id="lb-ja" onclick="setLang('ja')">日</button>
+        <button class="lang-btn"        id="lb-ch" onclick="setLang('ch')">中</button>
+        <button class="lang-btn"        id="lb-en" onclick="setLang('en')">EN</button>
       </div>
       <button class="btn" id="scan-btn" onclick="startScan()" disabled>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/></svg>
-        再スキャン
+        <span data-i18n="rescan">再スキャン</span>
       </button>
     </div>
   </div>
@@ -238,18 +249,18 @@
   <div id="stats-inner">
     <div class="stat">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
-      <span class="stat-label">検出数</span>
+      <span class="stat-label" data-i18n="detected">検出数</span>
       <span class="stat-val mono" id="stat-total" style="color:var(--text)">0</span>
     </div>
     <div class="divider"></div>
-    <div class="stat"><div class="stat-dot" style="background:var(--red)"></div><span class="stat-label">高確度 (≥80)</span><span class="stat-val mono" id="stat-high" style="color:var(--red)">0</span></div>
-    <div class="stat"><div class="stat-dot" style="background:var(--yellow)"></div><span class="stat-label">中確度 (60–79)</span><span class="stat-val mono" id="stat-mid" style="color:var(--yellow)">0</span></div>
-    <div class="stat"><div class="stat-dot" style="background:#3fb950"></div><span class="stat-label">低確度 (≥40)</span><span class="stat-val mono" id="stat-low" style="color:#3fb950">0</span></div>
+    <div class="stat"><div class="stat-dot" style="background:var(--red)"></div><span class="stat-label" data-i18n="high">高確度 (≥80)</span><span class="stat-val mono" id="stat-high" style="color:var(--red)">0</span></div>
+    <div class="stat"><div class="stat-dot" style="background:var(--yellow)"></div><span class="stat-label" data-i18n="mid">中確度 (60–79)</span><span class="stat-val mono" id="stat-mid" style="color:var(--yellow)">0</span></div>
+    <div class="stat"><div class="stat-dot" style="background:#3fb950"></div><span class="stat-label" data-i18n="low">低確度 (≥40)</span><span class="stat-val mono" id="stat-low" style="color:#3fb950">0</span></div>
     <div class="filter-group">
-      <button class="filter-btn active-all" id="fb-all"  onclick="setFilter('all')">すべて</button>
-      <button class="filter-btn"            id="fb-high" onclick="setFilter('high')">高</button>
-      <button class="filter-btn"            id="fb-mid"  onclick="setFilter('mid')">中</button>
-      <button class="filter-btn"            id="fb-low"  onclick="setFilter('low')">低</button>
+      <button class="filter-btn active-all" id="fb-all"  onclick="setFilter('all')"  data-i18n="filterAll">すべて</button>
+      <button class="filter-btn"            id="fb-high" onclick="setFilter('high')" data-i18n="filterHigh">高</button>
+      <button class="filter-btn"            id="fb-mid"  onclick="setFilter('mid')"  data-i18n="filterMid">中</button>
+      <button class="filter-btn"            id="fb-low"  onclick="setFilter('low')"  data-i18n="filterLow">低</button>
     </div>
   </div>
 </div>
@@ -257,8 +268,8 @@
 <!-- MAIN -->
 <div id="main">
   <div id="setup-panel">
-    <h2>セットアップ</h2>
-    <p class="lead">LLMのバックエンドを選択して、AIで生成されたリポジトリを検出します。</p>
+    <h2 data-i18n="setupTitle">セットアップ</h2>
+    <p class="lead" data-i18n="setupLead">LLMのバックエンドを選択して、AIで生成されたリポジトリを検出します。</p>
 
     <!-- モード切り替えタブ -->
     <div class="mode-tabs">
@@ -267,74 +278,74 @@
           <path d="M8 3C8 3 6 5 6 8c0 1 .5 2 1 2.5"/><path d="M16 3c0 0 2 2 2 5 0 1-.5 2-1 2.5"/>
           <path d="M6 10.5C5 11 4 12 4 14c0 3 2 5 4 5h8c2 0 4-2 4-5 0-2-1-3-2-3.5"/>
         </svg>
-        Ollama（ローカル）
+        <span data-i18n="tabOllama">Ollama（ローカル）</span>
       </button>
       <button class="mode-tab" id="tab-claude" onclick="switchMode('claude')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/>
         </svg>
-        Claude API（クラウド）
+        <span data-i18n="tabClaude">Claude API（クラウド）</span>
       </button>
     </div>
 
     <!-- Ollama パネル -->
     <div class="mode-panel active" id="panel-ollama">
       <div class="setup-section">
-        <label class="setup-label">STEP 1 — Ollama サーバー URL <span>（デフォルト: http://localhost:11434）</span></label>
+        <label class="setup-label"><span data-i18n="step1Label">STEP 1 — Ollama サーバー URL</span> <span data-i18n="step1Hint">（デフォルト: http://localhost:11434）</span></label>
         <div class="check-row">
           <input type="text" class="url-input mono" id="ollama-url" value="http://localhost:11434" placeholder="http://localhost:11434" />
-          <button class="btn-purple" onclick="checkOllama()">接続テスト</button>
+          <button class="btn-purple" onclick="checkOllama()" data-i18n="connTest">接続テスト</button>
         </div>
         <div class="conn-msg" id="conn-msg"></div>
-        <p class="note">
+        <p class="note" data-i18n="connNote">
           Windows: 環境変数 <code>OLLAMA_ORIGINS=*</code> を設定して Ollama を再起動してください。<br>
           Mac/Linux: <code>OLLAMA_ORIGINS=* ollama serve</code>
         </p>
       </div>
       <div class="setup-section">
-        <label class="setup-label">STEP 2 — 使用モデルを選択 <span>（接続テスト後に自動取得）</span></label>
+        <label class="setup-label"><span data-i18n="step2Label">STEP 2 — 使用モデルを選択</span> <span data-i18n="step2Hint">（接続テスト後に自動取得）</span></label>
         <div class="check-row">
           <select class="model-select mono" id="model-select" onchange="onModelChange()">
-            <option value="">— 先に接続テストを実行してください —</option>
+            <option value="" data-i18n="modelPlaceholder">— 先に接続テストを実行してください —</option>
           </select>
-          <button class="btn-purple" id="refresh-btn" onclick="checkOllama()" style="display:none">更新</button>
+          <button class="btn-purple" id="refresh-btn" onclick="checkOllama()" style="display:none" data-i18n="refresh">更新</button>
         </div>
         <div class="model-guide">
           <div class="model-card recommended" onclick="pickModel('llama3.2')">
             <div class="model-card-name">llama3.2</div>
-            <div class="model-card-desc">バランス型。JSON出力が安定。3B・8Bから選択可。</div>
-            <span class="model-card-tag tag-rec">おすすめ</span>
+            <div class="model-card-desc" data-i18n="mc1desc">バランス型。JSON出力が安定。3B・8Bから選択可。</div>
+            <span class="model-card-tag tag-rec" data-i18n="mcRec">おすすめ</span>
           </div>
           <div class="model-card" onclick="pickModel('gemma3')">
             <div class="model-card-name">gemma3</div>
-            <div class="model-card-desc">Google製。軽量で高速。指示への追従が得意。</div>
-            <span class="model-card-tag tag-fast">高速</span>
+            <div class="model-card-desc" data-i18n="mc2desc">Google製。軽量で高速。指示への追従が得意。</div>
+            <span class="model-card-tag tag-fast" data-i18n="mcFast">高速</span>
           </div>
           <div class="model-card" onclick="pickModel('qwen2.5-coder')">
             <div class="model-card-name">qwen2.5-coder</div>
-            <div class="model-card-desc">コード特化モデル。リポジトリ構造の理解に優れる。</div>
-            <span class="model-card-tag tag-code">コード特化</span>
+            <div class="model-card-desc" data-i18n="mc3desc">コード特化モデル。リポジトリ構造の理解に優れる。</div>
+            <span class="model-card-tag tag-code" data-i18n="mcCode">コード特化</span>
           </div>
           <div class="model-card" onclick="pickModel('qwen2.5')">
             <div class="model-card-name">qwen2.5</div>
-            <div class="model-card-desc">自然言語理解能力が良好。多言語リポジトリに強い。</div>
-            <span class="model-card-tag tag-jp">自然言語◎</span>
+            <div class="model-card-desc" data-i18n="mc4desc">自然言語理解能力が良好。多言語リポジトリに強い。</div>
+            <span class="model-card-tag tag-jp" data-i18n="mcNlp">自然言語◎</span>
           </div>
         </div>
-        <p class="note">モデル未インストール: <code>ollama pull llama3.2</code></p>
+        <p class="note" data-i18n="modelNote">モデル未インストール: <code>ollama pull llama3.2</code></p>
       </div>
     </div>
 
     <!-- Claude API パネル -->
     <div class="mode-panel" id="panel-claude">
-      <div class="claude-info">
+      <div class="claude-info" data-i18n="claudeInfo">
         <strong>Claude API（クラウド）</strong> を使用します。高精度な分析が可能です。<br>
         20件分析の目安: <strong>$0.05〜$0.15</strong> 程度。並列処理で高速に分析します。
       </div>
       <div class="setup-section">
-        <label class="setup-label">Anthropic API Key <span>（必須）</span></label>
+        <label class="setup-label"><span data-i18n="apiKeyLabel">Anthropic API Key</span> <span data-i18n="apiKeyHint">（必須）</span></label>
         <input type="password" class="key-input mono" id="anthropic-key" placeholder="sk-ant-api03-xxxxxxxxxxxxxxxxxxxx" oninput="onKeyInput()" />
-        <p class="note">
+        <p class="note" data-i18n="apiKeyNote">
           <a href="https://console.anthropic.com/settings/keys" target="_blank">Anthropic Console → API Keys</a> で発行。
         </p>
       </div>
@@ -342,15 +353,15 @@
 
     <!-- 共通: GitHub Token -->
     <div class="setup-section">
-      <label class="setup-label">GitHub Personal Access Token <span>（任意・なしでも動作）</span></label>
+      <label class="setup-label"><span data-i18n="ghTokenLabel">GitHub Personal Access Token</span> <span data-i18n="ghTokenHint">（任意・なしでも動作）</span></label>
       <input type="password" class="token-input mono" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" />
-      <p class="note">
+      <p class="note" data-i18n="ghTokenNote">
         なし: 60 req/h　／　あり: 5,000 req/h —
         <a href="https://github.com/settings/tokens" target="_blank">GitHub Settings → Tokens</a>（スコープ: <code>public_repo</code>）
       </p>
     </div>
 
-    <button class="btn-primary" id="start-btn" onclick="initApp()" disabled>スキャン開始</button>
+    <button class="btn-primary" id="start-btn" onclick="initApp()" disabled data-i18n="startScan">スキャン開始</button>
   </div>
 
   <div id="error-area"></div>
@@ -358,6 +369,274 @@
 </div>
 
 <script>
+// ================================================================
+//  i18n — 翻訳辞書
+// ================================================================
+const I18N = {
+  ja: {
+    subtitle:       'AIで生成したリポジトリを検出',
+    llmUnset:       'LLM 未設定',
+    standby:        '待機中',
+    scanning:       'スキャン中...',
+    rescan:         '再スキャン',
+    detected:       '検出数',
+    high:           '高確度 (≥80)',
+    mid:            '中確度 (60–79)',
+    low:            '低確度 (≥40)',
+    filterAll:      'すべて',
+    filterHigh:     '高',
+    filterMid:      '中',
+    filterLow:      '低',
+    setupTitle:     'セットアップ',
+    setupLead:      'LLMのバックエンドを選択して、AIで生成されたリポジトリを検出します。',
+    tabOllama:      'Ollama（ローカル）',
+    tabClaude:      'Claude API（クラウド）',
+    step1Label:     'STEP 1 — Ollama サーバー URL',
+    step1Hint:      '（デフォルト: http://localhost:11434）',
+    connTest:       '接続テスト',
+    connNote:       'Windows: 環境変数 <code>OLLAMA_ORIGINS=*</code> を設定して Ollama を再起動してください。<br>Mac/Linux: <code>OLLAMA_ORIGINS=* ollama serve</code>',
+    step2Label:     'STEP 2 — 使用モデルを選択',
+    step2Hint:      '（接続テスト後に自動取得）',
+    modelPlaceholder:'— 先に接続テストを実行してください —',
+    refresh:        '更新',
+    mc1desc:        'バランス型。JSON出力が安定。3B・8Bから選択可。',
+    mc2desc:        'Google製。軽量で高速。指示への追従が得意。',
+    mc3desc:        'コード特化モデル。リポジトリ構造の理解に優れる。',
+    mc4desc:        '自然言語理解能力が良好。多言語リポジトリに強い。',
+    mcRec:          'おすすめ',
+    mcFast:         '高速',
+    mcCode:         'コード特化',
+    mcNlp:          '自然言語◎',
+    modelNote:      'モデル未インストール: <code>ollama pull llama3.2</code>',
+    claudeInfo:     '<strong>Claude API（クラウド）</strong> を使用します。高精度な分析が可能です。<br>20件分析の目安: <strong>$0.05〜$0.15</strong> 程度。並列処理で高速に分析します。',
+    apiKeyLabel:    'Anthropic API Key',
+    apiKeyHint:     '（必須）',
+    apiKeyNote:     '<a href="https://console.anthropic.com/settings/keys" target="_blank">Anthropic Console → API Keys</a> で発行。',
+    ghTokenLabel:   'GitHub Personal Access Token',
+    ghTokenHint:    '（任意・なしでも動作）',
+    ghTokenNote:    'なし: 60 req/h　／　あり: 5,000 req/h — <a href="https://github.com/settings/tokens" target="_blank">GitHub Settings → Tokens</a>（スコープ: <code>public_repo</code>）',
+    startScan:      'スキャン開始',
+    ollamaConnected:'Ollama 接続中',
+    ollamaOffline:  'Ollama オフライン',
+    ollamaUnknown:  'Ollama 未確認',
+    connOk:         (url) => `✓ Ollama に接続しました（${url}）`,
+    connFail:       (msg) => `✗ 接続失敗: ${msg}<br>→ Ollamaが起動しているか確認: <code>ollama serve</code><br>→ Windows: 環境変数 <code>OLLAMA_ORIGINS=*</code> を設定して再起動<br>→ Mac/Linux: <code>OLLAMA_ORIGINS=* ollama serve</code>`,
+    noModel:        'モデルがありません — ollama pull llama3.2',
+    errSelectModel: 'モデルを選択してください。',
+    errOllamaConn:  'Ollama に接続できていません。接続テストを実行してください。',
+    errApiKey:      'Anthropic API Key を入力してください。',
+    scanningGithub: 'GitHub API からリポジトリ取得中...',
+    scanningLlm:    (model, i, n) => `[${model}] で分析中... (${i}/${n})`,
+    doneCount:      (label, n) => `完了 — ${label} / ${n}件検出`,
+    doneZero:       '完了 (0件)',
+    errScan:        'スキャン中にエラーが発生しました: ',
+    scanFailed:     'スキャン失敗',
+    noRepos:        'リポジトリが見つかりませんでした',
+    noMatch:        '該当するリポジトリがありません',
+    scoreLabel:     'AI判定スコア',
+    estTool:        '推定ツール',
+    lang:           '言語',
+    analysisModel:  '分析モデル',
+    detectedPats:   '検出パターン',
+    reasoning:      'LLM による分析根拠',
+    openGithub:     'GitHubで開く',
+    modelNotFound:  (p) => `「${p}」が見つかりません。\nターミナルで実行: ollama pull ${p}`,
+    connChecking:   '接続確認中...',
+  },
+  ch: {
+    subtitle:       '检测 AI 生成的代码仓库',
+    llmUnset:       'LLM 未设置',
+    standby:        '待机中',
+    scanning:       '扫描中...',
+    rescan:         '重新扫描',
+    detected:       '检测数',
+    high:           '高置信度 (≥80)',
+    mid:            '中置信度 (60–79)',
+    low:            '低置信度 (≥40)',
+    filterAll:      '全部',
+    filterHigh:     '高',
+    filterMid:      '中',
+    filterLow:      '低',
+    setupTitle:     '设置',
+    setupLead:      '选择 LLM 后端，检测 AI 生成的代码仓库。',
+    tabOllama:      'Ollama（本地）',
+    tabClaude:      'Claude API（云端）',
+    step1Label:     'STEP 1 — Ollama 服务器 URL',
+    step1Hint:      '（默认: http://localhost:11434）',
+    connTest:       '连接测试',
+    connNote:       'Windows: 设置环境变量 <code>OLLAMA_ORIGINS=*</code> 后重启 Ollama。<br>Mac/Linux: <code>OLLAMA_ORIGINS=* ollama serve</code>',
+    step2Label:     'STEP 2 — 选择使用的模型',
+    step2Hint:      '（连接测试后自动获取）',
+    modelPlaceholder:'— 请先执行连接测试 —',
+    refresh:        '刷新',
+    mc1desc:        '均衡型。JSON 输出稳定。可选 3B·8B。',
+    mc2desc:        'Google 出品。轻量快速。擅长遵循指令。',
+    mc3desc:        '代码专用模型。善于理解仓库结构。',
+    mc4desc:        '自然语言理解能力强。适合多语言仓库。',
+    mcRec:          '推荐',
+    mcFast:         '快速',
+    mcCode:         '代码专用',
+    mcNlp:          '自然语言◎',
+    modelNote:      '未安装模型: <code>ollama pull llama3.2</code>',
+    claudeInfo:     '<strong>Claude API（云端）</strong> 分析精度高。<br>分析 20 个仓库约需 <strong>$0.05〜$0.15</strong>，并行处理速度快。',
+    apiKeyLabel:    'Anthropic API Key',
+    apiKeyHint:     '（必填）',
+    apiKeyNote:     '在 <a href="https://console.anthropic.com/settings/keys" target="_blank">Anthropic Console → API Keys</a> 申请。',
+    ghTokenLabel:   'GitHub Personal Access Token',
+    ghTokenHint:    '（可选・不填也可使用）',
+    ghTokenNote:    '无: 60 req/h　／　有: 5,000 req/h — <a href="https://github.com/settings/tokens" target="_blank">GitHub Settings → Tokens</a>（scope: <code>public_repo</code>）',
+    startScan:      '开始扫描',
+    ollamaConnected:'Ollama 已连接',
+    ollamaOffline:  'Ollama 离线',
+    ollamaUnknown:  'Ollama 未确认',
+    connOk:         (url) => `✓ 已连接到 Ollama（${url}）`,
+    connFail:       (msg) => `✗ 连接失败: ${msg}<br>→ 确认 Ollama 是否运行: <code>ollama serve</code><br>→ Windows: 设置环境变量 <code>OLLAMA_ORIGINS=*</code> 后重启<br>→ Mac/Linux: <code>OLLAMA_ORIGINS=* ollama serve</code>`,
+    noModel:        '未找到模型 — ollama pull llama3.2',
+    errSelectModel: '请选择模型。',
+    errOllamaConn:  '无法连接到 Ollama，请执行连接测试。',
+    errApiKey:      '请输入 Anthropic API Key。',
+    scanningGithub: '正在从 GitHub API 获取仓库...',
+    scanningLlm:    (model, i, n) => `[${model}] 分析中... (${i}/${n})`,
+    doneCount:      (label, n) => `完成 — ${label} / 检测到 ${n} 个`,
+    doneZero:       '完成（0个）',
+    errScan:        '扫描时发生错误: ',
+    scanFailed:     '扫描失败',
+    noRepos:        '未找到代码仓库',
+    noMatch:        '没有符合条件的仓库',
+    scoreLabel:     'AI 判定评分',
+    estTool:        '推测工具',
+    lang:           '语言',
+    analysisModel:  '分析模型',
+    detectedPats:   '检测到的模式',
+    reasoning:      'LLM 分析依据',
+    openGithub:     '在 GitHub 打开',
+    modelNotFound:  (p) => `未找到「${p}」。\n请在终端运行: ollama pull ${p}`,
+    connChecking:   '连接确认中...',
+  },
+  en: {
+    subtitle:       'Detect AI-generated repositories on GitHub',
+    llmUnset:       'LLM not set',
+    standby:        'Standby',
+    scanning:       'Scanning...',
+    rescan:         'Rescan',
+    detected:       'Detected',
+    high:           'High (≥80)',
+    mid:            'Medium (60–79)',
+    low:            'Low (≥40)',
+    filterAll:      'All',
+    filterHigh:     'High',
+    filterMid:      'Mid',
+    filterLow:      'Low',
+    setupTitle:     'Setup',
+    setupLead:      'Choose your LLM backend to detect AI-generated repositories.',
+    tabOllama:      'Ollama (Local)',
+    tabClaude:      'Claude API (Cloud)',
+    step1Label:     'STEP 1 — Ollama Server URL',
+    step1Hint:      '(default: http://localhost:11434)',
+    connTest:       'Test Connection',
+    connNote:       'Windows: set env var <code>OLLAMA_ORIGINS=*</code> and restart Ollama.<br>Mac/Linux: <code>OLLAMA_ORIGINS=* ollama serve</code>',
+    step2Label:     'STEP 2 — Select Model',
+    step2Hint:      '(auto-fetched after connection test)',
+    modelPlaceholder:'— Run connection test first —',
+    refresh:        'Refresh',
+    mc1desc:        'Balanced. Stable JSON output. Available in 3B & 8B.',
+    mc2desc:        'By Google. Lightweight and fast. Follows instructions well.',
+    mc3desc:        'Code-focused model. Excellent at understanding repo structure.',
+    mc4desc:        'Strong NLU. Great for multilingual repositories.',
+    mcRec:          'Recommended',
+    mcFast:         'Fast',
+    mcCode:         'Code-focused',
+    mcNlp:          'NLU ◎',
+    modelNote:      'Model not installed: <code>ollama pull llama3.2</code>',
+    claudeInfo:     '<strong>Claude API (Cloud)</strong> — High-accuracy analysis.<br>~<strong>$0.05–$0.15</strong> for 20 repos. Parallel processing for speed.',
+    apiKeyLabel:    'Anthropic API Key',
+    apiKeyHint:     '(required)',
+    apiKeyNote:     'Generate at <a href="https://console.anthropic.com/settings/keys" target="_blank">Anthropic Console → API Keys</a>.',
+    ghTokenLabel:   'GitHub Personal Access Token',
+    ghTokenHint:    '(optional)',
+    ghTokenNote:    'Without: 60 req/h　／　With: 5,000 req/h — <a href="https://github.com/settings/tokens" target="_blank">GitHub Settings → Tokens</a> (scope: <code>public_repo</code>)',
+    startScan:      'Start Scan',
+    ollamaConnected:'Ollama connected',
+    ollamaOffline:  'Ollama offline',
+    ollamaUnknown:  'Ollama unknown',
+    connOk:         (url) => `✓ Connected to Ollama (${url})`,
+    connFail:       (msg) => `✗ Connection failed: ${msg}<br>→ Check if Ollama is running: <code>ollama serve</code><br>→ Windows: set env var <code>OLLAMA_ORIGINS=*</code> and restart<br>→ Mac/Linux: <code>OLLAMA_ORIGINS=* ollama serve</code>`,
+    noModel:        'No models found — ollama pull llama3.2',
+    errSelectModel: 'Please select a model.',
+    errOllamaConn:  'Cannot connect to Ollama. Run the connection test first.',
+    errApiKey:      'Please enter your Anthropic API Key.',
+    scanningGithub: 'Fetching repositories from GitHub API...',
+    scanningLlm:    (model, i, n) => `Analyzing with [${model}]... (${i}/${n})`,
+    doneCount:      (label, n) => `Done — ${label} / ${n} detected`,
+    doneZero:       'Done (0 found)',
+    errScan:        'Error during scan: ',
+    scanFailed:     'Scan failed',
+    noRepos:        'No repositories found',
+    noMatch:        'No matching repositories',
+    scoreLabel:     'AI Detection Score',
+    estTool:        'Est. Tool',
+    lang:           'Language',
+    analysisModel:  'Analysis Model',
+    detectedPats:   'Detected Patterns',
+    reasoning:      'LLM Reasoning',
+    openGithub:     'Open on GitHub',
+    modelNotFound:  (p) => `"${p}" not found.\nRun in terminal: ollama pull ${p}`,
+    connChecking:   'Checking connection...',
+  },
+};
+
+let currentLang = 'ja';
+
+function t(key, ...args) {
+  const val = I18N[currentLang]?.[key] ?? I18N['ja'][key] ?? key;
+  return typeof val === 'function' ? val(...args) : val;
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  // ボタンのactive切り替え
+  ['ja','ch','en'].forEach(l => {
+    document.getElementById('lb-'+l).classList.toggle('active', l === lang);
+  });
+  // html lang属性を更新
+  document.documentElement.lang = lang === 'ch' ? 'ch-CN' : lang;
+
+  // data-i18n属性を持つ要素を一括更新
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const val = I18N[lang]?.[key];
+    if (!val || typeof val === 'function') return;
+    el.innerHTML = val;
+  });
+
+  // プレースホルダー専用要素（select option）
+  const sel = document.getElementById('model-select');
+  if (sel && sel.options[0] && !sel.options[0].value) {
+    sel.options[0].textContent = t('modelPlaceholder');
+  }
+
+  // 動的に生成されるテキスト（現在の状態に応じて更新）
+  const statusEl = document.getElementById('status-text');
+  if (statusEl) {
+    const cur = statusEl.textContent.trim();
+    // スキャン中でなければstandbyに戻す
+    if (!isScanning) statusEl.textContent = t('standby');
+  }
+
+  // LLMバッジ・ステータスを現在の状態に合わせて再描画
+  if (typeof currentMode !== 'undefined') {
+    if (currentMode === 'claude') {
+      setLlmBadge('cloud', 'Claude API');
+    } else {
+      if (ollamaOnline) setLlmBadge('online', t('ollamaConnected'));
+      else setLlmBadge('unknown', t('ollamaUnknown'));
+    }
+  }
+
+  // 結果グリッドが表示中なら再描画
+  if (allRepos.length) renderGrid();
+}
+
 // ================================================================
 //  定数・グローバル状態
 // ================================================================
@@ -391,7 +670,7 @@ function switchMode(mode) {
     if (key) updateModelBadge('claude-sonnet-4');
     document.getElementById('start-btn').disabled = !key;
   } else {
-    setLlmBadge(ollamaOnline ? 'online' : 'unknown', ollamaOnline ? 'Ollama 接続中' : 'Ollama 未確認');
+    setLlmBadge(ollamaOnline ? 'online' : 'unknown', ollamaOnline ? t('ollamaConnected') : t('ollamaUnknown'));
     document.getElementById('start-btn').disabled = !ollamaOnline || !selectedModel;
   }
 }
@@ -454,7 +733,7 @@ function updateModelBadge(name) {
 async function checkOllama() {
   ollamaUrl = document.getElementById('ollama-url').value.trim().replace(/\/$/, '');
   const msg = document.getElementById('conn-msg');
-  msg.className = 'conn-msg'; msg.textContent = '接続確認中...'; msg.style.display = 'block';
+  msg.className = 'conn-msg'; msg.textContent = t('connChecking'); msg.style.display = 'block';
 
   try {
     const res = await fetch(`${ollamaUrl}/api/tags`, { signal: AbortSignal.timeout(6000) });
@@ -462,21 +741,17 @@ async function checkOllama() {
     const data = await res.json();
 
     ollamaOnline = true;
-    setLlmBadge('online', 'Ollama 接続中');
+    setLlmBadge('online', t('ollamaConnected'));
     msg.className = 'conn-msg ok';
-    msg.textContent = `✓ Ollama に接続しました（${ollamaUrl}）`;
+    msg.textContent = t('connOk', ollamaUrl);
     populateModelSelect(data.models || []);
     document.getElementById('refresh-btn').style.display = 'inline-block';
 
   } catch (e) {
     ollamaOnline = false;
-    setLlmBadge('offline', 'Ollama オフライン');
+    setLlmBadge('offline', t('ollamaOffline'));
     msg.className = 'conn-msg err';
-    msg.innerHTML =
-      `✗ 接続失敗: ${e.message}<br>` +
-      `→ Ollamaが起動しているか確認: <code>ollama serve</code><br>` +
-      `→ Windows: 環境変数 <code>OLLAMA_ORIGINS=*</code> を設定して再起動<br>` +
-      `→ Mac/Linux: <code>OLLAMA_ORIGINS=* ollama serve</code>`;
+    msg.innerHTML = t('connFail', e.message);
     document.getElementById('start-btn').disabled = true;
   }
 }
@@ -485,7 +760,7 @@ function populateModelSelect(models) {
   const sel = document.getElementById('model-select');
   sel.innerHTML = '';
   if (!models.length) {
-    sel.innerHTML = '<option value="">モデルがありません — ollama pull llama3.2</option>';
+    sel.innerHTML = `<option value="">${t('noModel')}</option>`;
     document.getElementById('start-btn').disabled = true;
     return;
   }
@@ -519,7 +794,7 @@ function pickModel(prefix) {
       sel.value = opt.value; selectedModel = opt.value; updateModelBadge(selectedModel); return;
     }
   }
-  alert(`「${prefix}」が見つかりません。\nターミナルで実行: ollama pull ${prefix}`);
+  alert(t('modelNotFound', prefix));
 }
 
 // ================================================================
@@ -531,11 +806,11 @@ async function initApp() {
   if (currentMode === 'ollama') {
     ollamaUrl     = document.getElementById('ollama-url').value.trim().replace(/\/$/, '');
     selectedModel = document.getElementById('model-select').value;
-    if (!selectedModel) { setError('モデルを選択してください。'); return; }
-    if (!ollamaOnline)  { setError('Ollama に接続できていません。接続テストを実行してください。'); return; }
+    if (!selectedModel) { setError(t('errSelectModel')); return; }
+    if (!ollamaOnline)  { setError(t('errOllamaConn')); return; }
   } else {
     anthropicKey = document.getElementById('anthropic-key').value.trim();
-    if (!anthropicKey) { setError('Anthropic API Key を入力してください。'); return; }
+    if (!anthropicKey) { setError(t('errApiKey')); return; }
     updateModelBadge('claude-sonnet-4');
   }
 
@@ -552,15 +827,15 @@ async function startScan() {
   isScanning = true;
   document.getElementById('scan-btn').disabled = true;
   setError('');
-  setStatus('スキャン中...', true);
+  setStatus(t('scanning'), true);
 
   try {
-    showLoading('GitHub API からリポジトリ取得中...', null, 5);
+    showLoading(t('scanningGithub'), null, 5);
     const repos = await fetchRepos();
 
     if (!repos.length) {
-      showEmpty('リポジトリが見つかりませんでした');
-      setStatus('完了 (0件)', false);
+      showEmpty(t('noRepos'));
+      setStatus(t('doneZero'), false);
       return;
     }
 
@@ -572,13 +847,13 @@ async function startScan() {
     updateStats();
     renderGrid();
     const label = currentMode === 'ollama' ? selectedModel : 'Claude API';
-    setStatus(`完了 — ${label} / ${allRepos.length}件検出`, false);
+    setStatus(t('doneCount', label, allRepos.length), false);
 
   } catch (e) {
     console.error(e);
-    setError('スキャン中にエラーが発生しました: ' + e.message);
-    setStatus('エラー', false);
-    showEmpty('スキャン失敗');
+    setError(t('errScan') + e.message);
+    setStatus('Error', false);
+    showEmpty(t('scanFailed'));
   } finally {
     isScanning = false;
     document.getElementById('scan-btn').disabled = false;
@@ -619,19 +894,22 @@ async function fetchReadme(owner, name, maxLen) {
 //  共通プロンプト生成
 // ================================================================
 function buildPrompt(repo, readme) {
-  const o = repo.owner?.login || '不明';
+  const o = repo.owner?.login || 'unknown';
+  const summaryLang = currentLang === 'en' ? 'English'
+                    : currentLang === 'ch' ? 'Chinese (Simplified)'
+                    : 'Japanese';
   return `You are an AI-generated code detector. Analyze this GitHub repository.
 IMPORTANT: Respond with ONLY a JSON object. No markdown. No extra text.
 
 Repository data:
 name: ${repo.name}
 owner: ${o}
-description: ${repo.description || '説明なし'}
-language: ${repo.language || '不明'}
+description: ${repo.description || 'none'}
+language: ${repo.language || 'unknown'}
 stars: ${repo.stargazers_count||0} forks: ${repo.forks_count||0}
-created: ${repo.created_at?.split('T')[0]||'不明'} pushed: ${repo.pushed_at?.split('T')[0]||'不明'}
+created: ${repo.created_at?.split('T')[0]||'unknown'} pushed: ${repo.pushed_at?.split('T')[0]||'unknown'}
 size_kb: ${repo.size||0}
-topics: ${(repo.topics||[]).join(', ')||'なし'}
+topics: ${(repo.topics||[]).join(', ')||'none'}
 ${readme ? `readme: ${readme}` : ''}
 
 Return ONLY this JSON:
@@ -639,9 +917,9 @@ Return ONLY this JSON:
   "score": <0-100 integer, likelihood of AI generation>,
   "aiTool": "<v0|Cursor|Bolt.new|ChatGPT|Claude|Copilot|Replit|Unknown|Human>",
   "language": "<primary programming language>",
-  "summary": "<2 sentences in Japanese describing project purpose and tech stack>",
+  "summary": "<2 sentences in ${summaryLang} describing project purpose and tech stack>",
   "patterns": ["<evidence 1>", "<evidence 2>", "<evidence 3>"],
-  "reasoning": "<1 sentence in Japanese explaining your score>"
+  "reasoning": "<1 sentence in ${summaryLang} explaining your score>"
 }`;
 }
 
@@ -664,17 +942,17 @@ function buildResult(repo, parsed, modelLabel) {
   return {
     id:        repo.id,
     name:      repo.name,
-    owner:     repo.owner?.login || '不明',
+    owner:     repo.owner?.login || 'unknown',
     url:       repo.html_url,
     stars:     repo.stargazers_count || 0,
     forks:     repo.forks_count      || 0,
-    language:  parsed.language || repo.language || '不明',
+    language:  parsed.language || repo.language || 'unknown',
     score:     Math.max(0, Math.min(100, parseInt(parsed.score)||0)),
     aiTool:    parsed.aiTool   || 'Unknown',
-    summary:   parsed.summary  || repo.description || '説明なし',
+    summary:   parsed.summary  || repo.description || '—',
     patterns:  Array.isArray(parsed.patterns) ? parsed.patterns : [],
     reasoning: parsed.reasoning || '',
-    createdAt: repo.created_at?.split('T')[0] || '不明',
+    createdAt: repo.created_at?.split('T')[0] || '—',
     model:     modelLabel,
   };
 }
@@ -686,14 +964,14 @@ async function analyzeReposOllama(repos) {
   const results = [];
   for (let i = 0; i < repos.length; i++) {
     const pct = Math.round(20 + (i / repos.length) * 75);
-    showLoading(`[${selectedModel}] で分析中... (${i+1}/${repos.length})`, `▶ ${repos[i].name}`, pct);
+    showLoading(t('scanningLlm', selectedModel, i+1, repos.length), `▶ ${repos[i].name}`, pct);
     results.push(await analyzeRepoOllama(repos[i]));
   }
   return results;
 }
 
 async function analyzeRepoOllama(repo) {
-  const owner  = repo.owner?.login || '不明';
+  const owner  = repo.owner?.login || 'unknown';
   const readme = await fetchReadme(owner, repo.name, 1000);
   const prompt = buildPrompt(repo, readme);
   try {
@@ -711,7 +989,7 @@ async function analyzeRepoOllama(repo) {
     return buildResult(repo, safeParseJson(data.response||''), selectedModel);
   } catch (e) {
     console.warn('Ollama error:', repo.name, e.message);
-    return buildResult(repo, { patterns:['分析エラー: '+e.message.slice(0,60)], reasoning:'LLM応答取得に失敗' }, selectedModel);
+    return buildResult(repo, { patterns:['Analysis error: '+e.message.slice(0,60)], reasoning:'Failed to get LLM response' }, selectedModel);
   }
 }
 
@@ -723,14 +1001,14 @@ async function analyzeReposClaude(repos) {
   for (let i = 0; i < repos.length; i += batchSize) {
     const batch = repos.slice(i, i + batchSize);
     const pct   = Math.round(20 + (i / repos.length) * 75);
-    showLoading(`[Claude API] で分析中... (${i+1}/${repos.length})`, null, pct);
+    showLoading(t('scanningLlm', 'Claude API', i+1, repos.length), null, pct);
     results.push(...await Promise.all(batch.map(r => analyzeRepoClaude(r))));
   }
   return results;
 }
 
 async function analyzeRepoClaude(repo) {
-  const owner  = repo.owner?.login || '不明';
+  const owner  = repo.owner?.login || 'unknown';
   const readme = await fetchReadme(owner, repo.name, 1500);
   const prompt = buildPrompt(repo, readme);
   try {
@@ -750,7 +1028,7 @@ async function analyzeRepoClaude(repo) {
     return buildResult(repo, safeParseJson(text), 'Claude API');
   } catch (e) {
     console.warn('Claude error:', repo.name, e.message);
-    return buildResult(repo, { patterns:['分析エラー: '+e.message.slice(0,60)], reasoning:'API応答取得に失敗' }, 'Claude API');
+    return buildResult(repo, { patterns:['Analysis error: '+e.message.slice(0,60)], reasoning:'Failed to get API response' }, 'Claude API');
   }
 }
 
@@ -784,7 +1062,7 @@ function renderGrid() {
   else if (currentFilter==='mid') filtered=allRepos.filter(r=>r.score>=60&&r.score<80);
   else if (currentFilter==='low') filtered=allRepos.filter(r=>r.score>=40&&r.score<60);
 
-  if (!filtered.length) { showEmpty('該当するリポジトリがありません'); return; }
+  if (!filtered.length) { showEmpty(t('noMatch')); return; }
 
   const grid = document.createElement('div');
   grid.id = 'repo-grid';
@@ -855,30 +1133,30 @@ function showDetail(repo) {
       <div class="modal-body">
         <div class="detail-score-wrap">
           <div class="detail-score-label">
-            <span style="font-size:13px;color:var(--muted);font-family:var(--font-mono)">AI判定スコア</span>
+            <span style="font-size:13px;color:var(--muted);font-family:var(--font-mono)">${t('scoreLabel')}</span>
             <span class="detail-score-val" style="color:${color}">${repo.score}<span style="font-size:14px">/100</span></span>
           </div>
           <div class="detail-bar"><div class="detail-bar-fill" style="width:0%;background:${color}" id="dbar"></div></div>
         </div>
         <div class="detail-grid">
-          <div class="detail-cell"><div class="detail-cell-label">推定ツール</div><div class="detail-cell-val" style="color:${color}">${escHtml(repo.aiTool)}</div></div>
-          <div class="detail-cell"><div class="detail-cell-label">言語</div><div class="detail-cell-val" style="color:var(--text)">${escHtml(repo.language)}</div></div>
+          <div class="detail-cell"><div class="detail-cell-label">${t('estTool')}</div><div class="detail-cell-val" style="color:${color}">${escHtml(repo.aiTool)}</div></div>
+          <div class="detail-cell"><div class="detail-cell-label">${t('lang')}</div><div class="detail-cell-val" style="color:var(--text)">${escHtml(repo.language)}</div></div>
           <div class="detail-cell"><div class="detail-cell-label">Stars</div><div class="detail-cell-val" style="color:var(--text)">⭐ ${repo.stars}</div></div>
-          <div class="detail-cell"><div class="detail-cell-label">分析モデル</div><div class="detail-cell-val" style="color:var(--purple);font-size:11px">${escHtml(repo.model||'')}</div></div>
+          <div class="detail-cell"><div class="detail-cell-label">${t('analysisModel')}</div><div class="detail-cell-val" style="color:var(--purple);font-size:11px">${escHtml(repo.model||'')}</div></div>
         </div>
         ${repo.patterns.length ? `
           <div class="patterns-section">
-            <h4>検出パターン</h4>
+            <h4>${t('detectedPats')}</h4>
             ${repo.patterns.map(p=>`<div class="pattern-item"><div class="pattern-dot" style="background:${color}"></div><span>${escHtml(p)}</span></div>`).join('')}
           </div>` : ''}
         ${repo.reasoning ? `
           <div class="analysis-section">
-            <h4>LLM による分析根拠</h4>
+            <h4>${t('reasoning')}</h4>
             <div class="analysis-text">${escHtml(repo.reasoning)}</div>
           </div>` : ''}
         <button class="open-link-btn" onclick="window.open('${repo.url}','_blank')">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          GitHubで開く
+          ${t('openGithub')}
         </button>
       </div>
     </div>`;
